@@ -1,3 +1,8 @@
+# Add Save Images to File System
+```
+python save_image.py --filepath filepath --savedir savedir
+```
+
 # Instagram Crawler [![Build Status](https://travis-ci.org/huaying/instagram-crawler.svg?branch=master)](https://travis-ci.org/huaying/instagram-crawler)
 
 Below is what you can do with this program:

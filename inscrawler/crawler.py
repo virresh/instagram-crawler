@@ -119,7 +119,7 @@ class InsCrawler(Logging):
     def get_latest_posts_by_tag(self, tag, num):
         url = '%s/explore/tags/%s/' % (InsCrawler.URL, tag)
         self.browser.get(url)
-        return self._get_posts(num)
+        return self._get_posts_full(num)
 
     def auto_like(self, tag='', maximum=1000):
         self.login()
@@ -157,7 +157,8 @@ class InsCrawler(Logging):
         browser = self.browser
         browser.implicitly_wait(1)
         ele_post = browser.find_one('.v1Nh3 a')
-        ele_post.click()
+        browser.driver.execute_script("arguments[0].click();", ele_post)
+        # ele_post.click()
         dict_posts = {}
 
         pbar = tqdm(total=num)

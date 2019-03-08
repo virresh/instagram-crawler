@@ -43,19 +43,20 @@ def main(filepath, savedir):
         os.makedirs(savedir)
 
     for idx, image in enumerate(images):
-        filename = os.path.join(savedir, '%04d.jpg' % (idx))
+        for i_num, img in enumerate(image['img_urls']):
+            filename = os.path.join(savedir, '%04d_%04d.jpg' % (idx, i_num))
 
-        status = save_image(filename, image['img_url'])
-        if status == 'fail':
-            image_url = get_img_url_by_post_url(image['key'])
+            status = save_image(filename, img)
+            if status == 'fail':
+                image_url = get_img_url_by_post_url(image['key'])
 
-            if not img_url:
-                fail_posts.append(image)
-                continue
+                if not image_url:
+                    fail_posts.append(image)
+                    continue
 
-            status = save_image(filename, image['img_url'])
-            if status == fail:
-                fail_posts.append(image)
+                status = save_image(filename, image['img_url'])
+                if status == fail:
+                    fail_posts.append(image)
 
     if fail_posts:
         with open('fail_posts.json','w') as f:

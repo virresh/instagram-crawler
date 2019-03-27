@@ -86,13 +86,23 @@ class InsCrawler(Logging):
     def get_user_profile(self, username):
         browser = self.browser
         url = '%s/%s/' % (InsCrawler.URL, username)
-        browser.get(url)
+        main_window = browser.driver.current_window_handle
+        browser.driver.execute_script("window.open('');")
+        time.sleep(3)
+        # Switch to the new window
+        browser.driver.switch_to.window(browser.driver.window_handles[1])
+
+        browser.driver.get(url)
+        time.sleep(3)
+
         name = browser.find_one('.rhpdm')
         desc = browser.find_one('.-vDIg span')
         photo = browser.find_one('._6q-tv')
         statistics = [ele.text for ele in browser.find('.g47SY')]
         post_num, follower_num, following_num = statistics
-        return {
+
+        di = {
+            'uname': username,
             'name': name.text,
             'desc': desc.text if desc else None,
             'photo_url': photo.get_attribute('src'),
@@ -100,6 +110,14 @@ class InsCrawler(Logging):
             'follower_num': follower_num,
             'following_num': following_num
         }
+
+        # close the active tab
+        browser.driver.close()
+        time.sleep(0.5)
+        # Switch back to the first tab
+        browser.driver.switch_to.window(browser.driver.window_handles[0])
+
+        return di
 
     def get_user_posts(self, username, number=None, detail=False):
         user_profile = self.get_user_profile(username)
@@ -116,7 +134,7 @@ class InsCrawler(Logging):
     def get_latest_posts_by_tag(self, tag, num):
         url = '%s/explore/tags/%s/' % (InsCrawler.URL, tag)
         self.browser.get(url)
-        return self._get_posts(num)
+        return self._get_posts_full(num)
 
     def auto_like(self, tag='', maximum=1000):
         self.login()
@@ -173,6 +191,12 @@ class InsCrawler(Logging):
         likes = None
         el_likes = browser.find_one('.Nm9Fw > * > span')
         el_see_likes = browser.find_one('.vcOH2')
+        user_name = browser.driver.find_element_by_css_selector('.FPmhX.notranslate.nJAzx')
+
+        k = None
+        if user_name:
+            k = self.get_user_profile(user_name.text)
+            dict_post['user'] = k
 
         if el_see_likes is not None:
             el_plays = browser.find_one('.vcOH2 > span')

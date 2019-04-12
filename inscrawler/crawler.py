@@ -99,13 +99,16 @@ class InsCrawler(Logging):
         desc = browser.find_one('.-vDIg span')
         photo = browser.find_one('._6q-tv')
         statistics = [ele.text for ele in browser.find('.g47SY')]
-        post_num, follower_num, following_num = statistics
+        try:
+            post_num, follower_num, following_num = statistics
+        except Exception as e:
+            post_num, follower_num, following_num = (-1, -1, -1)
 
         di = {
             'uname': username,
-            'name': name.text,
+            'name': name.text if name else None,
             'desc': desc.text if desc else None,
-            'photo_url': photo.get_attribute('src'),
+            'photo_url': photo.get_attribute('src') if photo else None,
             'post_num': post_num,
             'follower_num': follower_num,
             'following_num': following_num
@@ -249,7 +252,6 @@ class InsCrawler(Logging):
         if comments:
             dict_post['comments'] = comments
 
-
     def _get_posts_full(self, num):
         @retry()
         def check_next_post(cur_key):
@@ -295,6 +297,7 @@ class InsCrawler(Logging):
                 sys.stderr.write(
                     '\x1b[1;31m' + 'Failed to fetch the post: ' + cur_key + '\x1b[0m' + '\n')
                 traceback.print_exc()
+                continue
 
             self.log(json.dumps(dict_post, ensure_ascii=False))
             dict_posts[browser.current_url] = dict_post
